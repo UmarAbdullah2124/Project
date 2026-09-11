@@ -3,6 +3,9 @@ const statusStyles: Record<string, { pill: string; dot: string }> = {
   onboarding: { pill: 'bg-amber-50 text-amber-700', dot: 'bg-amber-500' },
   trial: { pill: 'bg-amber-50 text-amber-700', dot: 'bg-amber-500' },
   inactive: { pill: 'bg-gray-100 text-gray-600', dot: 'bg-gray-400' },
+  pending: { pill: 'bg-amber-50 text-amber-700', dot: 'bg-amber-500' },
+  paid: { pill: 'bg-green-50 text-green-700', dot: 'bg-green-500' },
+  overdue: { pill: 'bg-red-50 text-red-700', dot: 'bg-red-500' },
 }
 
 export function StatusPill({ status }: { status: string }) {

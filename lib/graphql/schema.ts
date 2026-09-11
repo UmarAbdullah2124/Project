@@ -39,17 +39,26 @@ export const typeDefs = gql`
     createdAt: String!
   }
 
+  enum InvoiceStatus {
+    PENDING
+    PAID
+    OVERDUE
+  }
+
   type Invoice {
     id: ID!
     amount: Float!
     status: String!
+    issuedDate: String!
     dueDate: String!
+    client: Client!
   }
 
   type Query {
     clients: [Client!]!
     client(id: ID!): Client
     projects: [Project!]!
+    invoices: [Invoice!]!
   }
 
   input CreateClientInput {
@@ -70,9 +79,17 @@ export const typeDefs = gql`
     dueDate: String
   }
 
+  input CreateInvoiceInput {
+    clientId: ID!
+    amount: Float!
+    status: InvoiceStatus
+    dueDate: String!
+  }
+
   type Mutation {
     createClient(input: CreateClientInput!): Client!
     createProject(input: CreateProjectInput!): Project!
     updateProjectStatus(id: ID!, status: ProjectStatus!): Project!
+    createInvoice(input: CreateInvoiceInput!): Invoice!
   }
 `

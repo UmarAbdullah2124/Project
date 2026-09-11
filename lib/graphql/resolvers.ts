@@ -6,6 +6,7 @@ export const resolvers = {
     client: (_parent: unknown, { id }: { id: string }) =>
       prisma.client.findUnique({ where: { id } }),
     projects: () => prisma.project.findMany({ orderBy: { createdAt: 'desc' } }),
+    invoices: () => prisma.invoice.findMany({ orderBy: { issuedDate: 'desc' } }),
   },
   Client: {
     accountManager: (parent: { accountManagerId: string | null }) =>
@@ -22,6 +23,10 @@ export const resolvers = {
       prisma.client.findUnique({ where: { id: parent.clientId } }),
     owner: (parent: { ownerId: string }) =>
       prisma.user.findUnique({ where: { id: parent.ownerId } }),
+  },
+  Invoice: {
+    client: (parent: { clientId: string }) =>
+      prisma.client.findUnique({ where: { id: parent.clientId } }),
   },
   Mutation: {
     createClient: (_parent: unknown, { input }: { input: any }) =>
@@ -40,5 +45,14 @@ export const resolvers = {
     },
     updateProjectStatus: (_parent: unknown, { id, status }: { id: string; status: any }) =>
       prisma.project.update({ where: { id }, data: { status } }),
+    createInvoice: (_parent: unknown, { input }: { input: any }) =>
+      prisma.invoice.create({
+        data: {
+          clientId: input.clientId,
+          amount: input.amount,
+          status: input.status ?? 'PENDING',
+          dueDate: new Date(input.dueDate),
+        },
+      }),
   },
 }
