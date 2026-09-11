@@ -22,10 +22,21 @@ export const typeDefs = gql`
     role: String!
   }
 
+  enum ProjectStatus {
+    NOT_STARTED
+    IN_PROGRESS
+    REVIEW
+    DONE
+  }
+
   type Project {
     id: ID!
     title: String!
     status: String!
+    dueDate: String
+    client: Client!
+    owner: User!
+    createdAt: String!
   }
 
   type Invoice {
@@ -38,6 +49,7 @@ export const typeDefs = gql`
   type Query {
     clients: [Client!]!
     client(id: ID!): Client
+    projects: [Project!]!
   }
 
   input CreateClientInput {
@@ -50,7 +62,17 @@ export const typeDefs = gql`
     accountManagerId: ID
   }
 
+  input CreateProjectInput {
+    title: String!
+    clientId: ID!
+    ownerId: ID
+    status: ProjectStatus
+    dueDate: String
+  }
+
   type Mutation {
     createClient(input: CreateClientInput!): Client!
+    createProject(input: CreateProjectInput!): Project!
+    updateProjectStatus(id: ID!, status: ProjectStatus!): Project!
   }
 `
