@@ -42,18 +42,22 @@ model User {
   projects     Project[]  @relation("ProjectOwner")
   tasks        Task[]     @relation("TaskAssignee")
   auditLogs    AuditLog[]
+  accountManagedClients Client[] @relation("ClientAccountManager")
 }
 
 model Client {
-  id           String    @id @default(cuid())
-  name         String
-  industry     String?
-  contactEmail String?
-  contactPhone String?
-  status       String    @default("active")
-  createdAt    DateTime  @default(now())
-  projects     Project[]
-  invoices     Invoice[]
+  id                String    @id @default(cuid())
+  name              String
+  industry          String?
+  contactEmail      String?
+  contactPhone      String?
+  status            String    @default("active")
+  mrr               Decimal   @default(0)
+  accountManagerId  String?
+  accountManager    User?     @relation("ClientAccountManager", fields: [accountManagerId], references: [id])
+  createdAt         DateTime  @default(now())
+  projects          Project[]
+  invoices          Invoice[]
 }
 
 model Project {
