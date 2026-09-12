@@ -1,4 +1,19 @@
+import { GraphQLError } from 'graphql'
 import { prisma } from '@/lib/prisma'
+import type { GraphQLContext } from '@/lib/graphql/context'
+
+function requireEditor(context: GraphQLContext) {
+  if (!context.session?.user) {
+    throw new GraphQLError('Not authenticated', {
+      extensions: { code: 'UNAUTHENTICATED' },
+    })
+  }
+  if (context.session.user.role === 'VIEWER') {
+    throw new GraphQLError('Viewers cannot perform this action', {
+      extensions: { code: 'FORBIDDEN' },
+    })
+  }
+}
 
 export const resolvers = {
   Query: {
@@ -29,10 +44,17 @@ export const resolvers = {
       prisma.client.findUnique({ where: { id: parent.clientId } }),
   },
   Mutation: {
-    createClient: (_parent: unknown, { input }: { input: any }) =>
-      prisma.client.create({ data: input }),
-    createProject: async (_parent: unknown, { input }: { input: any }) => {
-      const ownerId = input.ownerId ?? (await prisma.user.findFirst())?.id
+    createClient: (_parent: unknown, { input }: { input: any }, context: GraphQLContext) => {
+      requireEditor(context)
+      return prisma.client.create({ data: input })
+    },
+    createProject: async (
+      _parent: unknown,
+      { input }: { input: any },
+      context: GraphQLContext
+    ) => {
+      requireEditor(context)
+      const ownerId = input.ownerId ?? context.session!.user.id
       return prisma.project.create({
         data: {
           title: input.title,
@@ -43,16 +65,24 @@ export const resolvers = {
         },
       })
     },
-    updateProjectStatus: (_parent: unknown, { id, status }: { id: string; status: any }) =>
-      prisma.project.update({ where: { id }, data: { status } }),
-    createInvoice: (_parent: unknown, { input }: { input: any }) =>
-      prisma.invoice.create({
+    updateProjectStatus: (
+      _parent: unknown,
+      { id, status }: { id: string; status: any },
+      context: GraphQLContext
+    ) => {
+      requireEditor(context)
+      return prisma.project.update({ where: { id }, data: { status } })
+    },
+    createInvoice: (_parent: unknown, { input }: { input: any }, context: GraphQLContext) => {
+      requireEditor(context)
+      return prisma.invoice.create({
         data: {
           clientId: input.clientId,
           amount: input.amount,
           status: input.status ?? 'PENDING',
           dueDate: new Date(input.dueDate),
         },
-      }),
+      })
+    },
   },
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { SessionProvider } from "next-auth/react";
 import { ApolloWrapper } from "@/lib/apollo-wrapper";
 import "./globals.css";
 
@@ -18,7 +19,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${fontSans.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <ApolloWrapper>{children}</ApolloWrapper>
+        <SessionProvider>
+          <ApolloWrapper>{children}</ApolloWrapper>
+        </SessionProvider>
       </body>
     </html>
   );

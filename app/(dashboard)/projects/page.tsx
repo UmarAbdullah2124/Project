@@ -21,6 +21,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { CalendarDays } from 'lucide-react'
+import { useSession } from 'next-auth/react'
 
 import { ProjectFormDialog } from '@/components/custom/project-form-dialog'
 
@@ -91,9 +92,9 @@ function findContainer(
   )
 }
 
-function ProjectCard({ project }: { project: Project }) {
+function ProjectCard({ project, disabled }: { project: Project; disabled: boolean }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: project.id })
+    useSortable({ id: project.id, disabled })
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -107,7 +108,9 @@ function ProjectCard({ project }: { project: Project }) {
       style={style}
       {...attributes}
       {...listeners}
-      className="cursor-grab space-y-1.5 rounded-lg border bg-white p-3 shadow-sm active:cursor-grabbing"
+      className={`space-y-1.5 rounded-lg border bg-white p-3 shadow-sm ${
+        disabled ? '' : 'cursor-grab active:cursor-grabbing'
+      }`}
     >
       <div className="text-sm font-medium text-gray-900">{project.title}</div>
       <div className="text-xs text-gray-500">{project.client.name}</div>
@@ -125,10 +128,12 @@ function Column({
   status,
   label,
   projects,
+  disabled,
 }: {
   status: Status
   label: string
   projects: Project[]
+  disabled: boolean
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status })
 
@@ -155,7 +160,9 @@ function Column({
               No projects
             </div>
           ) : (
-            projects.map((project) => <ProjectCard key={project.id} project={project} />)
+            projects.map((project) => (
+              <ProjectCard key={project.id} project={project} disabled={disabled} />
+            ))
           )}
         </SortableContext>
       </div>
@@ -164,6 +171,8 @@ function Column({
 }
 
 export default function ProjectsPage() {
+  const { data: sessionData } = useSession()
+  const isViewer = sessionData?.user?.role === 'VIEWER'
   const { data, loading, error } = useQuery<{ projects: Project[] }>(GET_PROJECTS)
   const [updateProjectStatus] = useMutation(UPDATE_PROJECT_STATUS, {
     refetchQueries: ['GetProjects'],
@@ -191,6 +200,7 @@ export default function ProjectsPage() {
   )
 
   const handleDragEnd = (event: DragEndEvent) => {
+    if (isViewer) return
     const { active, over } = event
     if (!over) return
 
@@ -249,6 +259,7 @@ export default function ProjectsPage() {
                 status={column.status}
                 label={column.label}
                 projects={columns[column.status]}
+                disabled={isViewer}
               />
             ))}
           </div>

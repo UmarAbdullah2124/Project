@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { gql } from '@apollo/client'
 import { useMutation, useQuery } from '@apollo/client/react'
+import { useSession } from 'next-auth/react'
 import { Plus } from 'lucide-react'
 
 import {
@@ -77,6 +78,7 @@ const defaultValues: InvoiceFormInput = {
 }
 
 export function InvoiceFormDialog() {
+  const { data: session } = useSession()
   const [open, setOpen] = useState(false)
 
   const { data: clientsData } = useQuery<{ clients: { id: string; name: string }[] }>(
@@ -113,6 +115,8 @@ export function InvoiceFormDialog() {
     reset(defaultValues)
     setOpen(false)
   }
+
+  if (session?.user?.role === 'VIEWER') return null
 
   return (
     <Dialog
