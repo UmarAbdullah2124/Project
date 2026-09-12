@@ -2,6 +2,7 @@
 
 import { gql } from '@apollo/client'
 import { useQuery } from '@apollo/client/react'
+import { useTheme } from '@/lib/theme-provider'
 import {
   Bar,
   BarChart,
@@ -47,17 +48,17 @@ const currencyFormatter = new Intl.NumberFormat('en-US', {
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-lg border bg-white p-6">
-      <div className="text-sm text-gray-500">{label}</div>
-      <div className="mt-2 text-3xl font-bold text-gray-900">{value}</div>
+    <div className="rounded-lg border bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+      <div className="text-sm text-gray-500 dark:text-gray-400">{label}</div>
+      <div className="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">{value}</div>
     </div>
   )
 }
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-lg border bg-white p-6">
-      <h2 className="mb-4 text-sm font-semibold text-gray-900">{title}</h2>
+    <div className="rounded-lg border bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+      <h2 className="mb-4 text-sm font-semibold text-gray-900 dark:text-gray-100">{title}</h2>
       {children}
     </div>
   )
@@ -65,13 +66,15 @@ function ChartCard({ title, children }: { title: string; children: React.ReactNo
 
 function EmptyChartState({ message }: { message: string }) {
   return (
-    <div className="flex h-64 items-center justify-center text-sm text-gray-500">
+    <div className="flex h-64 items-center justify-center text-sm text-gray-500 dark:text-gray-400">
       {message}
     </div>
   )
 }
 
 export default function DashboardPage() {
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
   const { data, loading, error } = useQuery<{ clients: Client[] }>(GET_CLIENTS)
   const clients = data?.clients ?? []
 
@@ -97,9 +100,9 @@ export default function DashboardPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-semibold">Dashboard</h1>
-          <p className="text-sm text-gray-500">Overview of your client portfolio</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Overview of your client portfolio</p>
         </div>
-        <div className="rounded-lg border bg-white p-6 text-center text-sm text-gray-500">
+        <div className="rounded-lg border bg-white p-6 text-center text-sm text-gray-500 dark:border-slate-800 dark:bg-slate-900 dark:text-gray-400">
           Loading...
         </div>
       </div>
@@ -111,9 +114,9 @@ export default function DashboardPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-semibold">Dashboard</h1>
-          <p className="text-sm text-gray-500">Overview of your client portfolio</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Overview of your client portfolio</p>
         </div>
-        <div className="rounded-lg border bg-white p-6 text-center text-sm text-red-500">
+        <div className="rounded-lg border bg-white p-6 text-center text-sm text-red-500 dark:border-slate-800 dark:bg-slate-900 dark:text-red-400">
           Failed to load dashboard data.
         </div>
       </div>
@@ -124,7 +127,7 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Dashboard</h1>
-        <p className="text-sm text-gray-500">Overview of your client portfolio</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Overview of your client portfolio</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -135,7 +138,7 @@ export default function DashboardPage() {
       </div>
 
       {totalClients === 0 ? (
-        <div className="rounded-lg border bg-white p-12 text-center text-sm text-gray-500">
+        <div className="rounded-lg border bg-white p-12 text-center text-sm text-gray-500 dark:border-slate-800 dark:bg-slate-900 dark:text-gray-400">
           No clients yet. Add your first client to see portfolio insights here.
         </div>
       ) : (
@@ -143,10 +146,32 @@ export default function DashboardPage() {
           <ChartCard title="Clients by Status">
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={statusData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="status" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} />
-                <YAxis allowDecimals={false} tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} />
-                <Tooltip cursor={{ fill: '#f9fafb' }} />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  vertical={false}
+                  stroke={isDark ? '#334155' : '#f1f5f9'}
+                />
+                <XAxis
+                  dataKey="status"
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fontSize: 12, fill: isDark ? '#94a3b8' : '#6b7280' }}
+                />
+                <YAxis
+                  allowDecimals={false}
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fontSize: 12, fill: isDark ? '#94a3b8' : '#6b7280' }}
+                />
+                <Tooltip
+                  cursor={{ fill: isDark ? '#1e293b' : '#f9fafb' }}
+                  contentStyle={
+                    isDark
+                      ? { backgroundColor: '#0f172a', border: '1px solid #334155', color: '#e2e8f0' }
+                      : undefined
+                  }
+                  labelStyle={isDark ? { color: '#e2e8f0' } : undefined}
+                />
                 <Bar dataKey="count" radius={[6, 6, 0, 0]} maxBarSize={64}>
                   {statusData.map((entry) => (
                     <Cell key={entry.key} fill={STATUS_COLORS[entry.key]} />
@@ -162,12 +187,16 @@ export default function DashboardPage() {
             ) : (
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={topClients} layout="vertical" margin={{ left: 8 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    horizontal={false}
+                    stroke={isDark ? '#334155' : '#f1f5f9'}
+                  />
                   <XAxis
                     type="number"
                     tickLine={false}
                     axisLine={false}
-                    tick={{ fontSize: 12, fill: '#6b7280' }}
+                    tick={{ fontSize: 12, fill: isDark ? '#94a3b8' : '#6b7280' }}
                     tickFormatter={(value) => currencyFormatter.format(value)}
                   />
                   <YAxis
@@ -176,11 +205,17 @@ export default function DashboardPage() {
                     tickLine={false}
                     axisLine={false}
                     width={100}
-                    tick={{ fontSize: 12, fill: '#6b7280' }}
+                    tick={{ fontSize: 12, fill: isDark ? '#94a3b8' : '#6b7280' }}
                   />
                   <Tooltip
-                    cursor={{ fill: '#f9fafb' }}
+                    cursor={{ fill: isDark ? '#1e293b' : '#f9fafb' }}
                     formatter={(value) => currencyFormatter.format(Number(value))}
+                    contentStyle={
+                      isDark
+                        ? { backgroundColor: '#0f172a', border: '1px solid #334155', color: '#e2e8f0' }
+                        : undefined
+                    }
+                    labelStyle={isDark ? { color: '#e2e8f0' } : undefined}
                   />
                   <Bar dataKey="mrr" radius={[0, 6, 6, 0]} fill="#4f46e5" maxBarSize={24} />
                 </BarChart>

@@ -132,7 +132,7 @@ export function ProjectFormDialog() {
     >
       <DialogTrigger
         render={
-          <Button className="bg-indigo-600 hover:bg-indigo-700">
+          <Button className="bg-indigo-600 text-white hover:bg-indigo-700">
             <Plus size={16} className="mr-2" />
             New Project
           </Button>
@@ -214,7 +214,7 @@ export function ProjectFormDialog() {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="bg-indigo-600 hover:bg-indigo-700"
+              className="bg-indigo-600 text-white hover:bg-indigo-700"
             >
               {isSubmitting ? 'Creating...' : 'Create Project'}
             </Button>

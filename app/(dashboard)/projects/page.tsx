@@ -108,14 +108,14 @@ function ProjectCard({ project, disabled }: { project: Project; disabled: boolea
       style={style}
       {...attributes}
       {...listeners}
-      className={`space-y-1.5 rounded-lg border bg-white p-3 shadow-sm ${
+      className={`space-y-1.5 rounded-lg border bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800 ${
         disabled ? '' : 'cursor-grab active:cursor-grabbing'
       }`}
     >
-      <div className="text-sm font-medium text-gray-900">{project.title}</div>
-      <div className="text-xs text-gray-500">{project.client.name}</div>
+      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{project.title}</div>
+      <div className="text-xs text-gray-500 dark:text-gray-400">{project.client.name}</div>
       {project.dueDate && (
-        <div className="flex items-center gap-1 text-xs text-gray-400">
+        <div className="flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500">
           <CalendarDays size={12} />
           {formatDueDate(project.dueDate)}
         </div>
@@ -138,17 +138,17 @@ function Column({
   const { setNodeRef, isOver } = useDroppable({ id: status })
 
   return (
-    <div className="flex w-72 shrink-0 flex-col rounded-lg bg-gray-100 p-3">
+    <div className="flex w-72 shrink-0 flex-col rounded-lg bg-gray-100 p-3 dark:bg-slate-900">
       <div className="mb-3 flex items-center justify-between px-1">
-        <h3 className="text-sm font-semibold text-gray-700">{label}</h3>
-        <span className="rounded-full bg-white px-2 py-0.5 text-xs font-medium text-gray-500">
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{label}</h3>
+        <span className="rounded-full bg-white px-2 py-0.5 text-xs font-medium text-gray-500 dark:bg-slate-700 dark:text-gray-400">
           {projects.length}
         </span>
       </div>
       <div
         ref={setNodeRef}
         className={`min-h-[120px] flex-1 space-y-2 rounded-md p-1 transition-colors ${
-          isOver ? 'bg-indigo-50' : ''
+          isOver ? 'bg-indigo-50 dark:bg-indigo-500/10' : ''
         }`}
       >
         <SortableContext
@@ -156,7 +156,7 @@ function Column({
           strategy={verticalListSortingStrategy}
         >
           {projects.length === 0 ? (
-            <div className="rounded-md border border-dashed border-gray-300 p-4 text-center text-xs text-gray-400">
+            <div className="rounded-md border border-dashed border-gray-300 p-4 text-center text-xs text-gray-400 dark:border-slate-700 dark:text-gray-500">
               No projects
             </div>
           ) : (
@@ -229,19 +229,19 @@ export default function ProjectsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Projects</h1>
-          <p className="text-sm text-gray-500">{totalProjects} total projects</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{totalProjects} total projects</p>
         </div>
         <ProjectFormDialog />
       </div>
 
       {loading && (
-        <div className="rounded-lg border bg-white p-6 text-center text-sm text-gray-500">
+        <div className="rounded-lg border bg-white p-6 text-center text-sm text-gray-500 dark:border-slate-800 dark:bg-slate-900 dark:text-gray-400">
           Loading...
         </div>
       )}
 
       {error && (
-        <div className="rounded-lg border bg-white p-6 text-center text-sm text-red-500">
+        <div className="rounded-lg border bg-white p-6 text-center text-sm text-red-500 dark:border-slate-800 dark:bg-slate-900 dark:text-red-400">
           Failed to load projects.
         </div>
       )}

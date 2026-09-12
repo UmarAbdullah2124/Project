@@ -1,13 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { gql } from '@apollo/client'
 import { useMutation } from '@apollo/client/react'
-import { useSession } from 'next-auth/react'
-import { Plus } from 'lucide-react'
 
 import {
   Dialog,
@@ -16,7 +14,6 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-  DialogTrigger,
 } from '@/components/ui/dialog'
 import { Field, FieldLabel, FieldError, FieldGroup } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
@@ -29,9 +26,9 @@ import {
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 
-const CREATE_CLIENT = gql`
-  mutation CreateClient($input: CreateClientInput!) {
-    createClient(input: $input) {
+const UPDATE_CLIENT = gql`
+  mutation UpdateClient($id: ID!, $input: UpdateClientInput!) {
+    updateClient(id: $id, input: $input) {
       id
       name
       industry
@@ -59,19 +56,36 @@ const clientFormSchema = z.object({
 type ClientFormInput = z.input<typeof clientFormSchema>
 type ClientFormOutput = z.output<typeof clientFormSchema>
 
-const defaultValues: ClientFormInput = {
-  name: '',
-  industry: '',
-  contactEmail: '',
-  contactPhone: '',
-  status: 'onboarding',
-  mrr: undefined,
+export type EditableClient = {
+  id: string
+  name: string
+  industry: string | null
+  contactEmail: string | null
+  contactPhone: string | null
+  status: string
+  mrr: number
 }
 
-export function ClientFormDialog() {
-  const { data: session } = useSession()
-  const [open, setOpen] = useState(false)
+function toFormValues(client: EditableClient): ClientFormInput {
+  return {
+    name: client.name,
+    industry: client.industry ?? '',
+    contactEmail: client.contactEmail ?? '',
+    contactPhone: client.contactPhone ?? '',
+    status: (client.status as ClientFormInput['status']) ?? 'onboarding',
+    mrr: client.mrr,
+  }
+}
 
+export function EditClientDialog({
+  client,
+  open,
+  onOpenChange,
+}: {
+  client: EditableClient
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}) {
   const {
     register,
     control,
@@ -80,17 +94,22 @@ export function ClientFormDialog() {
     formState: { errors, isSubmitting },
   } = useForm<ClientFormInput, unknown, ClientFormOutput>({
     resolver: zodResolver(clientFormSchema),
-    defaultValues,
+    defaultValues: toFormValues(client),
   })
 
-  const [createClient] = useMutation(CREATE_CLIENT, {
-    refetchQueries: ['GetClients'],
+  useEffect(() => {
+    if (open) reset(toFormValues(client))
+  }, [open, client, reset])
+
+  const [updateClient] = useMutation(UPDATE_CLIENT, {
+    refetchQueries: ['GetClient', 'GetClients'],
     awaitRefetchQueries: true,
   })
 
   const onSubmit = async (values: ClientFormOutput) => {
-    await createClient({
+    await updateClient({
       variables: {
+        id: client.id,
         input: {
           name: values.name,
           industry: values.industry || null,
@@ -101,54 +120,35 @@ export function ClientFormDialog() {
         },
       },
     })
-    reset(defaultValues)
-    setOpen(false)
+    onOpenChange(false)
   }
 
-  if (session?.user?.role === 'VIEWER') return null
-
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(nextOpen) => {
-        setOpen(nextOpen)
-        if (!nextOpen) reset(defaultValues)
-      }}
-    >
-      <DialogTrigger
-        render={
-          <Button className="bg-indigo-600 text-white hover:bg-indigo-700">
-            <Plus size={16} className="mr-2" />
-            Add Client
-          </Button>
-        }
-      />
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Client</DialogTitle>
-          <DialogDescription>
-            Create a new client record. You can fill in the rest of the details later.
-          </DialogDescription>
+          <DialogTitle>Edit Client</DialogTitle>
+          <DialogDescription>Update this client&apos;s details.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <FieldGroup>
             <Field data-invalid={!!errors.name}>
-              <FieldLabel htmlFor="name">Client Name</FieldLabel>
-              <Input id="name" placeholder="Acme Corp" {...register('name')} />
+              <FieldLabel htmlFor="edit-name">Client Name</FieldLabel>
+              <Input id="edit-name" placeholder="Acme Corp" {...register('name')} />
               <FieldError errors={errors.name ? [errors.name] : undefined} />
             </Field>
 
             <Field data-invalid={!!errors.industry}>
-              <FieldLabel htmlFor="industry">Industry</FieldLabel>
-              <Input id="industry" placeholder="Software" {...register('industry')} />
+              <FieldLabel htmlFor="edit-industry">Industry</FieldLabel>
+              <Input id="edit-industry" placeholder="Software" {...register('industry')} />
               <FieldError errors={errors.industry ? [errors.industry] : undefined} />
             </Field>
 
             <Field data-invalid={!!errors.contactEmail}>
-              <FieldLabel htmlFor="contactEmail">Contact Email</FieldLabel>
+              <FieldLabel htmlFor="edit-contactEmail">Contact Email</FieldLabel>
               <Input
-                id="contactEmail"
+                id="edit-contactEmail"
                 type="email"
                 placeholder="jane@acme.com"
                 {...register('contactEmail')}
@@ -157,19 +157,23 @@ export function ClientFormDialog() {
             </Field>
 
             <Field data-invalid={!!errors.contactPhone}>
-              <FieldLabel htmlFor="contactPhone">Contact Phone</FieldLabel>
-              <Input id="contactPhone" placeholder="+1 555 123 4567" {...register('contactPhone')} />
+              <FieldLabel htmlFor="edit-contactPhone">Contact Phone</FieldLabel>
+              <Input
+                id="edit-contactPhone"
+                placeholder="+1 555 123 4567"
+                {...register('contactPhone')}
+              />
               <FieldError errors={errors.contactPhone ? [errors.contactPhone] : undefined} />
             </Field>
 
             <Field data-invalid={!!errors.status}>
-              <FieldLabel htmlFor="status">Status</FieldLabel>
+              <FieldLabel htmlFor="edit-status">Status</FieldLabel>
               <Controller
                 name="status"
                 control={control}
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger id="status" className="w-full">
+                    <SelectTrigger id="edit-status" className="w-full">
                       <SelectValue placeholder="Select a status" />
                     </SelectTrigger>
                     <SelectContent>
@@ -184,9 +188,9 @@ export function ClientFormDialog() {
             </Field>
 
             <Field data-invalid={!!errors.mrr}>
-              <FieldLabel htmlFor="mrr">MRR</FieldLabel>
+              <FieldLabel htmlFor="edit-mrr">MRR</FieldLabel>
               <Input
-                id="mrr"
+                id="edit-mrr"
                 type="number"
                 step="0.01"
                 placeholder="0.00"
@@ -197,11 +201,7 @@ export function ClientFormDialog() {
           </FieldGroup>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setOpen(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button
@@ -209,7 +209,7 @@ export function ClientFormDialog() {
               disabled={isSubmitting}
               className="bg-indigo-600 text-white hover:bg-indigo-700"
             >
-              {isSubmitting ? 'Saving...' : 'Save Client'}
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
             </Button>
           </DialogFooter>
         </form>

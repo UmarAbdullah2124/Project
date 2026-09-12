@@ -1,11 +1,32 @@
 const statusStyles: Record<string, { pill: string; dot: string }> = {
-  active: { pill: 'bg-green-50 text-green-700', dot: 'bg-green-500' },
-  onboarding: { pill: 'bg-amber-50 text-amber-700', dot: 'bg-amber-500' },
-  trial: { pill: 'bg-amber-50 text-amber-700', dot: 'bg-amber-500' },
-  inactive: { pill: 'bg-gray-100 text-gray-600', dot: 'bg-gray-400' },
-  pending: { pill: 'bg-amber-50 text-amber-700', dot: 'bg-amber-500' },
-  paid: { pill: 'bg-green-50 text-green-700', dot: 'bg-green-500' },
-  overdue: { pill: 'bg-red-50 text-red-700', dot: 'bg-red-500' },
+  active: {
+    pill: 'bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400',
+    dot: 'bg-green-500',
+  },
+  onboarding: {
+    pill: 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400',
+    dot: 'bg-amber-500',
+  },
+  trial: {
+    pill: 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400',
+    dot: 'bg-amber-500',
+  },
+  inactive: {
+    pill: 'bg-gray-100 text-gray-600 dark:bg-gray-500/10 dark:text-gray-400',
+    dot: 'bg-gray-400',
+  },
+  pending: {
+    pill: 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400',
+    dot: 'bg-amber-500',
+  },
+  paid: {
+    pill: 'bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400',
+    dot: 'bg-green-500',
+  },
+  overdue: {
+    pill: 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400',
+    dot: 'bg-red-500',
+  },
 }
 
 export function StatusPill({ status }: { status: string }) {

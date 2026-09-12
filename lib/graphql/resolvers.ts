@@ -15,6 +15,19 @@ function requireEditor(context: GraphQLContext) {
   }
 }
 
+function requireAdmin(context: GraphQLContext) {
+  if (!context.session?.user) {
+    throw new GraphQLError('Not authenticated', {
+      extensions: { code: 'UNAUTHENTICATED' },
+    })
+  }
+  if (context.session.user.role !== 'ADMIN') {
+    throw new GraphQLError('Only admins can perform this action', {
+      extensions: { code: 'FORBIDDEN' },
+    })
+  }
+}
+
 export const resolvers = {
   Query: {
     clients: () => prisma.client.findMany({ orderBy: { createdAt: 'desc' } }),
@@ -22,6 +35,10 @@ export const resolvers = {
       prisma.client.findUnique({ where: { id } }),
     projects: () => prisma.project.findMany({ orderBy: { createdAt: 'desc' } }),
     invoices: () => prisma.invoice.findMany({ orderBy: { issuedDate: 'desc' } }),
+    users: (_parent: unknown, _args: unknown, context: GraphQLContext) => {
+      requireAdmin(context)
+      return prisma.user.findMany({ orderBy: { createdAt: 'asc' } })
+    },
   },
   Client: {
     accountManager: (parent: { accountManagerId: string | null }) =>
@@ -47,6 +64,14 @@ export const resolvers = {
     createClient: (_parent: unknown, { input }: { input: any }, context: GraphQLContext) => {
       requireEditor(context)
       return prisma.client.create({ data: input })
+    },
+    updateClient: (
+      _parent: unknown,
+      { id, input }: { id: string; input: any },
+      context: GraphQLContext
+    ) => {
+      requireEditor(context)
+      return prisma.client.update({ where: { id }, data: input })
     },
     createProject: async (
       _parent: unknown,

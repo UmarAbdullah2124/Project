@@ -20,6 +20,7 @@ export const typeDefs = gql`
     name: String!
     email: String!
     role: String!
+    createdAt: String!
   }
 
   enum ProjectStatus {
@@ -59,9 +60,20 @@ export const typeDefs = gql`
     client(id: ID!): Client
     projects: [Project!]!
     invoices: [Invoice!]!
+    users: [User!]!
   }
 
   input CreateClientInput {
+    name: String!
+    industry: String
+    contactEmail: String
+    contactPhone: String
+    status: String
+    mrr: Float
+    accountManagerId: ID
+  }
+
+  input UpdateClientInput {
     name: String!
     industry: String
     contactEmail: String
@@ -88,6 +100,7 @@ export const typeDefs = gql`
 
   type Mutation {
     createClient(input: CreateClientInput!): Client!
+    updateClient(id: ID!, input: UpdateClientInput!): Client!
     createProject(input: CreateProjectInput!): Project!
     updateProjectStatus(id: ID!, status: ProjectStatus!): Project!
     createInvoice(input: CreateInvoiceInput!): Invoice!

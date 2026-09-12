@@ -1,8 +1,20 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import Script from "next/script";
 import { SessionProvider } from "next-auth/react";
 import { ApolloWrapper } from "@/lib/apollo-wrapper";
+import { ThemeProvider } from "@/lib/theme-provider";
 import "./globals.css";
+
+const themeInitScript = `
+(function () {
+  try {
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+  } catch (e) {}
+})();
+`;
 
 const fontSans = Plus_Jakarta_Sans({
   variable: "--font-sans",
@@ -17,11 +29,20 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${fontSans.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className={`${fontSans.variable} h-full antialiased`}
+      suppressHydrationWarning
+    >
       <body className="min-h-full flex flex-col">
-        <SessionProvider>
-          <ApolloWrapper>{children}</ApolloWrapper>
-        </SessionProvider>
+        <Script id="theme-init" strategy="beforeInteractive">
+          {themeInitScript}
+        </Script>
+        <ThemeProvider>
+          <SessionProvider>
+            <ApolloWrapper>{children}</ApolloWrapper>
+          </SessionProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
