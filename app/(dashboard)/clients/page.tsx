@@ -4,18 +4,11 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { gql } from '@apollo/client'
 import { useQuery } from '@apollo/client/react'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
 import { ClientFormDialog } from '@/components/custom/client-form-dialog'
 import { StatusPill } from '@/components/custom/status-pill'
+import { DataTable, type DataTableColumn } from '@/components/custom/data-table'
 
 const GET_CLIENTS = gql`
   query GetClients {
@@ -51,7 +44,13 @@ export default function ClientsPage() {
     return matchesSearch && matchesTab
   })
   const hasClients = (data?.clients?.length ?? 0) > 0
-  const hasFilteredResults = filteredClients.length > 0
+
+  const columns: DataTableColumn<Client>[] = [
+    { key: 'name', header: 'Name', render: (client) => client.name, className: 'font-medium' },
+    { key: 'industry', header: 'Industry', render: (client) => client.industry },
+    { key: 'status', header: 'Status', render: (client) => <StatusPill status={client.status} /> },
+    { key: 'mrr', header: 'MRR', render: (client) => `$${client.mrr.toLocaleString()}` },
+  ]
 
   return (
     <div className="space-y-6">
@@ -94,62 +93,20 @@ export default function ClientsPage() {
         </div>
       </div>
 
-      <div className="border rounded-lg bg-white dark:border-slate-800 dark:bg-slate-900">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Industry</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>MRR</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading && (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center text-gray-500 py-8 dark:text-gray-400">
-                  Loading...
-                </TableCell>
-              </TableRow>
-            )}
-            {error && (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center text-red-500 py-8 dark:text-red-400">
-                  Failed to load clients.
-                </TableCell>
-              </TableRow>
-            )}
-            {!loading && !error && !hasClients && (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center text-gray-500 py-8 dark:text-gray-400">
-                  No clients yet. Add your first client to get started.
-                </TableCell>
-              </TableRow>
-            )}
-            {!loading && !error && hasClients && !hasFilteredResults && (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center text-gray-500 py-8 dark:text-gray-400">
-                  No results match your search/filter.
-                </TableCell>
-              </TableRow>
-            )}
-            {filteredClients.map((client) => (
-              <TableRow
-                key={client.id}
-                onClick={() => router.push(`/clients/${client.id}`)}
-                className="cursor-pointer"
-              >
-                <TableCell className="font-medium">{client.name}</TableCell>
-                <TableCell>{client.industry}</TableCell>
-                <TableCell>
-                  <StatusPill status={client.status} />
-                </TableCell>
-                <TableCell>${client.mrr.toLocaleString()}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <DataTable
+        columns={columns}
+        rows={filteredClients}
+        getRowKey={(client) => client.id}
+        onRowClick={(client) => router.push(`/clients/${client.id}`)}
+        loading={loading}
+        error={!!error}
+        errorMessage="Failed to load clients."
+        emptyMessage={
+          !hasClients
+            ? 'No clients yet. Add your first client to get started.'
+            : 'No results match your search/filter.'
+        }
+      />
     </div>
   )
 }

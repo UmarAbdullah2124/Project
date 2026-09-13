@@ -3,18 +3,11 @@
 import { useState } from 'react'
 import { gql } from '@apollo/client'
 import { useQuery } from '@apollo/client/react'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
 import { InvoiceFormDialog } from '@/components/custom/invoice-form-dialog'
 import { StatusPill } from '@/components/custom/status-pill'
+import { DataTable, type DataTableColumn } from '@/components/custom/data-table'
 
 const GET_INVOICES = gql`
   query GetInvoices {
@@ -73,7 +66,30 @@ export default function InvoicesPage() {
     return matchesSearch && matchesTab
   })
   const hasInvoices = (data?.invoices?.length ?? 0) > 0
-  const hasFilteredResults = filteredInvoices.length > 0
+
+  const columns: DataTableColumn<Invoice>[] = [
+    {
+      key: 'client',
+      header: 'Client',
+      render: (invoice) => invoice.client.name,
+      className: 'font-medium',
+    },
+    {
+      key: 'amount',
+      header: 'Amount',
+      render: (invoice) => currencyFormatter.format(invoice.amount),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (invoice) => <StatusPill status={formatStatusLabel(invoice.status)} />,
+    },
+    {
+      key: 'dueDate',
+      header: 'Due Date',
+      render: (invoice) => formatEpochString(invoice.dueDate),
+    },
+  ]
 
   return (
     <div className="space-y-6">
@@ -116,58 +132,19 @@ export default function InvoicesPage() {
         </div>
       </div>
 
-      <div className="border rounded-lg bg-white dark:border-slate-800 dark:bg-slate-900">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Client</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Due Date</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading && (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center text-gray-500 py-8 dark:text-gray-400">
-                  Loading...
-                </TableCell>
-              </TableRow>
-            )}
-            {error && (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center text-red-500 py-8 dark:text-red-400">
-                  Failed to load invoices.
-                </TableCell>
-              </TableRow>
-            )}
-            {!loading && !error && !hasInvoices && (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center text-gray-500 py-8 dark:text-gray-400">
-                  No invoices yet. Create your first invoice to get started.
-                </TableCell>
-              </TableRow>
-            )}
-            {!loading && !error && hasInvoices && !hasFilteredResults && (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center text-gray-500 py-8 dark:text-gray-400">
-                  No results match your search/filter.
-                </TableCell>
-              </TableRow>
-            )}
-            {filteredInvoices.map((invoice) => (
-              <TableRow key={invoice.id}>
-                <TableCell className="font-medium">{invoice.client.name}</TableCell>
-                <TableCell>{currencyFormatter.format(invoice.amount)}</TableCell>
-                <TableCell>
-                  <StatusPill status={formatStatusLabel(invoice.status)} />
-                </TableCell>
-                <TableCell>{formatEpochString(invoice.dueDate)}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <DataTable
+        columns={columns}
+        rows={filteredInvoices}
+        getRowKey={(invoice) => invoice.id}
+        loading={loading}
+        error={!!error}
+        errorMessage="Failed to load invoices."
+        emptyMessage={
+          !hasInvoices
+            ? 'No invoices yet. Create your first invoice to get started.'
+            : 'No results match your search/filter.'
+        }
+      />
     </div>
   )
 }

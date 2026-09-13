@@ -70,3 +70,5 @@ skills-lock.json
 .opencode/
 .github/prompts/
 skills-lock.json
+*storybook.log
+storybook-static
