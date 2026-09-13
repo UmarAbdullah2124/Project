@@ -35,16 +35,18 @@ export function SidebarUserFooter({
         onClick={toggleTheme}
         className="shrink-0 rounded-md p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white"
         title="Toggle theme"
+        aria-label={mounted && theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
       >
-        {mounted && theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+        {mounted && theme === 'dark' ? <Sun size={16} aria-hidden="true" /> : <Moon size={16} aria-hidden="true" />}
       </button>
       <button
         type="button"
         onClick={() => signOut({ callbackUrl: '/login' })}
         className="shrink-0 rounded-md p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white"
         title="Sign out"
+        aria-label="Sign out"
       >
-        <LogOut size={16} />
+        <LogOut size={16} aria-hidden="true" />
       </button>
     </div>
   )

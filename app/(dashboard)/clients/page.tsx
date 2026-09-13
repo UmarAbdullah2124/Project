@@ -69,6 +69,7 @@ export default function ClientsPage() {
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
           <Input
             placeholder="Search clients..."
+            aria-label="Search clients"
             className="pl-9"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
@@ -84,7 +85,7 @@ export default function ClientsPage() {
               className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                 activeTab === tab
                   ? 'bg-white text-gray-900 shadow-sm dark:bg-slate-700 dark:text-gray-100'
-                  : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'
+                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
               }`}
             >
               {tab}

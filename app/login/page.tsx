@@ -56,7 +56,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <main className="flex min-h-screen">
       <div className="relative hidden w-1/2 overflow-hidden bg-gradient-to-br from-slate-900 to-indigo-950 md:flex">
         <div
           className="absolute inset-0 opacity-20"
@@ -133,6 +133,6 @@ export default function LoginPage() {
           </form>
         </div>
       </div>
-    </div>
+    </main>
   )
 }

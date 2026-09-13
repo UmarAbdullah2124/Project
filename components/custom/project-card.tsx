@@ -52,7 +52,7 @@ export function ProjectCard({
       <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{project.title}</div>
       <div className="text-xs text-gray-500 dark:text-gray-400">{project.client.name}</div>
       {project.dueDate && (
-        <div className="flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500">
+        <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
           <CalendarDays size={12} />
           {formatDueDate(project.dueDate)}
         </div>

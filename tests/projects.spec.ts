@@ -79,4 +79,65 @@ test.describe('Projects', () => {
     )
     await expect(inProgressColumnAfterReload.getByText(uniqueTitle)).toBeVisible()
   })
+
+  test('a keyboard-only user can move a card between columns with dnd-kit\'s keyboard sensor', async ({
+    page,
+  }) => {
+    const uniqueTitle = `Keyboard Test Project ${Date.now()}`
+
+    await loginAndWaitForDashboard(page, USERS.manager.email, USERS.manager.password)
+
+    await page.goto('/projects')
+    await page.getByRole('button', { name: 'New Project' }).click()
+    await page.locator('#title').fill(uniqueTitle)
+    await page.locator('#clientId').click()
+    await page.getByRole('option').first().click()
+    await page.getByRole('button', { name: 'Create Project' }).click()
+
+    const notStartedColumn = page.locator('[data-testid="kanban-column"][data-status="NOT_STARTED"]')
+    const inProgressColumn = page.locator('[data-testid="kanban-column"][data-status="IN_PROGRESS"]')
+
+    await expect(notStartedColumn.getByText(uniqueTitle)).toBeVisible()
+
+    // Reload so focus starts from a clean slate, then Tab through the page
+    // exactly as a keyboard-only user would, rather than jumping straight to
+    // the card with .focus() - that would hide a broken tab order.
+    await page.reload()
+    await page.waitForURL('**/projects')
+    await expect(notStartedColumn.getByText(uniqueTitle)).toBeVisible()
+
+    const card = notStartedColumn.locator('[data-testid="project-card"]', {
+      hasText: uniqueTitle,
+    })
+
+    let reachedCard = false
+    for (let i = 0; i < 60; i++) {
+      await page.keyboard.press('Tab')
+      if (await card.evaluate((el) => el === document.activeElement)) {
+        reachedCard = true
+        break
+      }
+    }
+    expect(reachedCard, 'Could not reach the project card via Tab alone').toBeTruthy()
+
+    // dnd-kit's KeyboardSensor: Space/Enter picks up, arrow keys move between
+    // droppable containers (columns are laid out left-to-right, so Right
+    // moves to the next column), Space/Enter drops.
+    await page.keyboard.press('Space')
+    await page.keyboard.press('ArrowRight')
+    await page.waitForTimeout(150)
+
+    const [response] = await Promise.all([
+      page.waitForResponse(
+        (res) =>
+          res.url().includes('/api/graphql') &&
+          res.request().postDataJSON()?.query?.includes('UpdateProjectStatus')
+      ),
+      page.keyboard.press('Space'),
+    ])
+    expect(response.ok()).toBeTruthy()
+
+    await expect(inProgressColumn.getByText(uniqueTitle)).toBeVisible()
+    await expect(notStartedColumn.getByText(uniqueTitle)).not.toBeVisible()
+  })
 })

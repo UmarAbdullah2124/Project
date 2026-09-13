@@ -193,13 +193,13 @@ export default function ClientDetailPage() {
                   <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
                     <Mail size={16} className="text-gray-400 dark:text-gray-500" />
                     {client.contactEmail || (
-                      <span className="text-gray-400 dark:text-gray-500">Not provided</span>
+                      <span className="text-gray-600 dark:text-gray-400">Not provided</span>
                     )}
                   </div>
                   <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
                     <Phone size={16} className="text-gray-400 dark:text-gray-500" />
                     {client.contactPhone || (
-                      <span className="text-gray-400 dark:text-gray-500">Not provided</span>
+                      <span className="text-gray-600 dark:text-gray-400">Not provided</span>
                     )}
                   </div>
                 </div>
@@ -227,7 +227,7 @@ export default function ClientDetailPage() {
                     </div>
                   </div>
                 ) : (
-                  <span className="text-sm text-gray-400 dark:text-gray-500">Unassigned</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Unassigned</span>
                 )}
               </Card>
             </div>
