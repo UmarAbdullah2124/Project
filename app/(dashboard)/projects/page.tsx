@@ -95,7 +95,11 @@ function Column({
   const { setNodeRef, isOver } = useDroppable({ id: status })
 
   return (
-    <div className="flex w-72 shrink-0 flex-col rounded-lg bg-gray-100 p-3 dark:bg-slate-900">
+    <div
+      data-testid="kanban-column"
+      data-status={status}
+      className="flex w-72 shrink-0 flex-col rounded-lg bg-gray-100 p-3 dark:bg-slate-900"
+    >
       <div className="mb-3 flex items-center justify-between px-1">
         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{label}</h3>
         <span className="rounded-full bg-white px-2 py-0.5 text-xs font-medium text-gray-500 dark:bg-slate-700 dark:text-gray-400">

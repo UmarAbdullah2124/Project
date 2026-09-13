@@ -44,6 +44,7 @@ export function ProjectCard({
       style={style}
       {...attributes}
       {...listeners}
+      data-testid="project-card"
       className={`space-y-1.5 rounded-lg border bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800 ${
         disabled ? '' : 'cursor-grab active:cursor-grabbing'
       }`}
