@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -68,7 +68,7 @@ const defaultValues: ClientFormInput = {
   mrr: undefined,
 }
 
-export function ClientFormDialog() {
+function ClientFormDialogImpl() {
   const { data: session } = useSession()
   const [open, setOpen] = useState(false)
 
@@ -217,3 +217,5 @@ export function ClientFormDialog() {
     </Dialog>
   )
 }
+
+export const ClientFormDialog = memo(ClientFormDialogImpl)

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import Script from "next/script";
 import { SessionProvider } from "next-auth/react";
-import { ApolloWrapper } from "@/lib/apollo-wrapper";
 import { ThemeProvider } from "@/lib/theme-provider";
 import "./globals.css";
 
@@ -39,9 +38,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {themeInitScript}
         </Script>
         <ThemeProvider>
-          <SessionProvider>
-            <ApolloWrapper>{children}</ApolloWrapper>
-          </SessionProvider>
+          <SessionProvider>{children}</SessionProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -81,7 +81,7 @@ const defaultValues: ProjectFormValues = {
   dueDate: '',
 }
 
-export function ProjectFormDialog() {
+function ProjectFormDialogImpl() {
   const { data: session } = useSession()
   const [open, setOpen] = useState(false)
 
@@ -224,3 +224,5 @@ export function ProjectFormDialog() {
     </Dialog>
   )
 }
+
+export const ProjectFormDialog = memo(ProjectFormDialogImpl)
